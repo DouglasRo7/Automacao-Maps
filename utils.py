@@ -1,4 +1,5 @@
 from datetime import datetime
+import pyautogui
 import requests
 import json
 import os
@@ -41,6 +42,23 @@ def api_places(texto):
         # Pesquisa e recebe os places Ids dos lugares encontrados
         response = requests.get(url, params=params)
         dados = response.json()
+        if dados.get("status") == "REQUEST_DENIED":
+            logger.error(f"API Key inválida ou sem permissão: {dados.get('error_message')}")
+            pyautogui.alert(
+                text='Chave da API inválida ou sem permissão. O programa será encerrado.',
+                title='Aviso',
+                button='OK'
+            )
+            exit()
+
+        if dados.get("status") != "OK":
+            logger.error(f"Erro retornado pela API: {dados.get('status')}")
+            pyautogui.alert(
+                text='Erro retornado pela API. O programa será encerrado.',
+                title='Aviso',
+                button='OK'
+            )
+            exit()
         placeid = [id["place_id"] for id in dados["results"][:5]]
         logger.info(f"Places IDs foram  encontrados")
         resultados = []
